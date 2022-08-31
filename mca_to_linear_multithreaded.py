@@ -33,15 +33,19 @@ def convert_file(source_file):
 
     source_size = os.path.getsize(source_file)
     if convert_to_linear == False or source_size == 0:
-        print(source_filename, "already converted, skipping")
         return
 
-    region = open_region_anvil(source_file)
-    write_region_linear(destination_file, region, compression_level=compression_level)
+    try:
+        region = open_region_anvil(source_file)
+        write_region_linear(destination_file, region, compression_level=compression_level)
 
-    destination_size = os.path.getsize(destination_file)
+        destination_size = os.path.getsize(destination_file)
 
-    print(source_file, "converted, compression %3d%%" % (100 * destination_size / source_size))
+        print(source_file, "converted, compression %3d%%" % (100 * destination_size / source_size))
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        print("Error with region file", source_file)
 
 file_list = glob(os.path.join(source_dir, "*.mca"))
 print("Found", len(file_list), "files to convert", len(file_list))
