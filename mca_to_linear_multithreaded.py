@@ -11,11 +11,6 @@ if len(sys.argv) != 5:
     print("Usage: threads compression_level source_dir destination_dir")
     exit(0)
 
-threads = int(sys.argv[1])
-compression_level = int(sys.argv[2])
-source_dir = sys.argv[3]
-destination_dir = sys.argv[4]
-
 def convert_file(source_file):
     os.makedirs(destination_dir, exist_ok=True)
     
@@ -47,8 +42,14 @@ def convert_file(source_file):
         traceback.print_exc()
         print("Error with region file", source_file)
 
-file_list = glob(os.path.join(source_dir, "*.mca"))
-print("Found", len(file_list), "files to convert", len(file_list))
+if __name__ == "__main__":
+    threads = int(sys.argv[1])
+    compression_level = int(sys.argv[2])
+    source_dir = sys.argv[3]
+    destination_dir = sys.argv[4]
 
-pool = Pool(threads)
-pool.map(convert_file, file_list)
+    file_list = glob(os.path.join(source_dir, "*.mca"))
+    print("Found", len(file_list), "files to convert", len(file_list))
+
+    pool = Pool(threads)
+    pool.map(convert_file, file_list)
