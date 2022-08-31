@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 
 import sys
-import zlib
-import time
 
 from linear import Chunk, Region, open_region_linear, write_region_anvil
 
