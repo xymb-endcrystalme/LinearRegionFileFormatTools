@@ -1,7 +1,22 @@
 # Linear region file format for Minecraft
 
 Linear region format saves about 50% of disk space in OW and Nether and 95% in The End.
+
 This repository hosts tools to convert between `.mca` and `.linear`.
+
+## Features:
+- Saves about 50% of space when compared to Anvil
+- Reads and writes whole files, so it will actually be _faster_ than `.mca` on a spinning HDD (way less IOPS than `.mca`)
+- Replaces symlinks with files, thus allows caching on HDD
+- Uses slightly more memory than Anvil - it has to store the whole region file in memory
+
+## Stability:
+
+It's been running on Endcrystal.me (3TB world) since November 2021 without issues. I personally consider it stable, I found no region-file specific issues.
+
+Plugins should be 99.99% compatible, with the ocasional strange plugin that absolutely _has to_ open the `.mca` by itself.
+
+All plugins that use NMS or Bukkit (ex. Chunky) will work.
 
 ## Supported software:
 
