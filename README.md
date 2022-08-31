@@ -12,10 +12,14 @@ This repository hosts tools to convert between `.mca` and `.linear`.
 - Much simpler format - about 300 lines of code vs about 1000 LoC for Anvil
 
 ## How:
-There are two problems with the default Minecraft region file format (Anvil):
+There are three problems with the default Minecraft region file format (Anvil):
 - Each chunk is compressed individually
 - Anvil uses a very outdated compression algorithm (zlib)
 - Each chunk is padded to 4096 bytes
+
+Linear compresses a whole region file at once, achieving superior compression ratio.
+
+It also gets rid of `.mcc` files for chunks bigger than 1MB as it's a stupid, unnecessary kludge. The total limit for whole region file is 4GB.
 
 ### Individual compression of chunks:
 The fact that each chunk is stored individually in Anvil means that compression doesn't have the opportunity to "learn" the surrounding data.
