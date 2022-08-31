@@ -28,7 +28,8 @@ for source_file in glob(os.path.join(source_dir, "*.mca")):
     except FileNotFoundError:
         convert_to_linear = True
 
-    if convert_to_linear == False:
+    source_size = os.path.getsize(source_file)
+    if convert_to_linear == False or source_size == 0:
         print(source_filename, "already converted, skipping")
         continue
 
