@@ -136,7 +136,10 @@ def write_region_linear(destination_filename, region: Region, compression_level=
 
     final_region_file = preheader + complete_region_hash + complete_region + footer
 
-    open(destination_filename + ".wip", "wb").write(final_region_file)
+    with open(destination_filename + ".wip", "wb") as f:
+        f.write(final_region_file)
+        f.flush()
+        os.fsync(f.fileno()) # Ensure atomicity on Btrfs
     os.utime(destination_filename + ".wip", (region.mtime, region.mtime))
     os.rename(destination_filename + ".wip", destination_filename)
 
@@ -232,7 +235,10 @@ def write_region_anvil(destination_filename, region: Region, compression_level=z
     for i in range(REGION_DIMENSION * REGION_DIMENSION):
         header_timestamps.append(struct.pack(">I", region.timestamps[i]))
 
-    open(destination_filename + ".wip", "wb").write(b''.join(header_chunks) + b''.join(header_timestamps) + b''.join(sectors))
+    with open(destination_filename + ".wip", "wb") as f:
+        f.write(b''.join(header_chunks) + b''.join(header_timestamps) + b''.join(sectors))
+        f.flush()
+        os.fsync(f.fileno()) # Ensure atomicity on Btrfs
     os.utime(destination_filename + ".wip", (region.mtime, region.mtime))
     os.rename(destination_filename + ".wip", destination_filename)
 
