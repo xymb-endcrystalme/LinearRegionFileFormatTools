@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 
-import sys
 import os
 import os.path
+import argparse
 from glob import glob
-from linear import Chunk, Region, write_region_linear, open_region_anvil
-from multiprocessing import Pool
-
-if len(sys.argv) != 5:
-    print("Usage: threads compression_level source_dir destination_dir")
-    exit(0)
+from linear import write_region_linear, open_region_anvil
+from multiprocessing import Pool, cpu_count
 
 def convert_file(source_file):
     os.makedirs(destination_dir, exist_ok=True)
@@ -43,10 +39,18 @@ def convert_file(source_file):
         print("Error with region file", source_file)
 
 if __name__ == "__main__":
-    threads = int(sys.argv[1])
-    compression_level = int(sys.argv[2])
-    source_dir = sys.argv[3]
-    destination_dir = sys.argv[4]
+    parser = argparse.ArgumentParser(description="Convert Anvil region files to Linear format")
+    parser.add_argument("-t", "--threads", type=int, default=cpu_count(), help="Number of threads (default: number of CPUs)")
+    parser.add_argument("-c", "--compression-level", type=int, default=6, help="Compression level (default: 6)")
+    parser.add_argument("source_dir", help="Source directory containing Anvil region files")
+    parser.add_argument("destination_dir", help="Destination directory to store converted Linear region files")
+
+    args = parser.parse_args()
+
+    threads = args.threads
+    compression_level = args.compression_level
+    source_dir = args.source_dir
+    destination_dir = args.destination_dir
 
     file_list = glob(os.path.join(source_dir, "*.mca"))
     print("Found", len(file_list), "files to convert", len(file_list))
