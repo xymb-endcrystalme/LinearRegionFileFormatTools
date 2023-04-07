@@ -4,6 +4,7 @@ import sys
 import os
 import os.path
 import argparse
+import zlib
 from glob import glob
 from linear import open_region_linear, write_region_anvil, open_region_anvil, write_region_linear
 from multiprocessing import Pool, cpu_count, Manager
@@ -39,7 +40,7 @@ def convert_file(args):
     try:
         if conversion_mode == "linear2mca":
             region = open_region_linear(source_file)
-            write_region_anvil(destination_file, region, compression_level=compression_level)
+            write_region_anvil(destination_file, region, compression_level=zlib.Z_DEFAULT_COMPRESSION)
         else:
             region = open_region_anvil(source_file)
             write_region_linear(destination_file, region, compression_level=compression_level)
@@ -58,7 +59,7 @@ if __name__ == "__main__":
     parser = CustomArgumentParser(description="Convert region files between Anvil and Linear format")
     parser.add_argument("conversion_mode", choices=["mca2linear", "linear2mca"], help="Conversion direction: mca2linear or linear2mca")
     parser.add_argument("-t", "--threads", type=int, default=cpu_count(), help="Number of threads (default: number of CPUs)")
-    parser.add_argument("-c", "--compression-level", type=int, default=6, help="Compression level (default: 6)")
+    parser.add_argument("-c", "--compression-level", type=int, default=6, help="Zstd compression level (default: 6)")
     parser.add_argument("-l", "--log", const=True, nargs="?", default=False, help="Show a log of files instead of a progress bar")
     parser.add_argument("source_dir", help="Source directory containing region files")
     parser.add_argument("destination_dir", help="Destination directory to store converted region files")
