@@ -57,9 +57,6 @@ All plugins that use NMS or Bukkit (ex. Chunky) will work.
 
 [LinearPurpur](https://github.com/xymb-endcrystalme/LinearPurpur) - Linear-enabled version of Purpur. No further changes, 100% compatible with Purpur. Precompiled binaries included.
 
-
-[LinearMultiPaper](https://github.com/xymb-endcrystalme/LinearMultiPaper) - MultiPaper with a few custom patches, including Linear region file format. No binaries available.
-
 ## Python prerequisites:
 
 ```
