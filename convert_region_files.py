@@ -6,16 +6,16 @@ import os.path
 import argparse
 from glob import glob
 from linear import open_region_linear, write_region_anvil, open_region_anvil, write_region_linear
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool, cpu_count, Manager
+from tqdm import tqdm
 
 class CustomArgumentParser(argparse.ArgumentParser):
-    def error(self, message):
-        sys.stderr.write('error: %s\n' % message)
+    def error(self, _):
         self.print_help()
         sys.exit(1)
 
 def convert_file(args):
-    source_file, conversion_mode, destination_dir, compression_level = args
+    source_file, conversion_mode, destination_dir, compression_level, converted_counter, skipped_counter, log = args
 
     os.makedirs(destination_dir, exist_ok=True)
 
@@ -33,6 +33,7 @@ def convert_file(args):
 
     source_size = os.path.getsize(source_file)
     if not convert or source_size == 0:
+        skipped_counter.value += 1
         return
 
     try:
@@ -45,7 +46,9 @@ def convert_file(args):
 
         destination_size = os.path.getsize(destination_file)
 
-        print(source_file, "converted, compression %3d%%" % (100 * destination_size / source_size))
+        if log:
+            print(source_file, "converted, compression %3d%%" % (100 * destination_size / source_size))
+        converted_counter.value += 1
     except Exception:
         import traceback
         traceback.print_exc()
@@ -56,6 +59,7 @@ if __name__ == "__main__":
     parser.add_argument("conversion_mode", choices=["mca2linear", "linear2mca"], help="Conversion direction: mca2linear or linear2mca")
     parser.add_argument("-t", "--threads", type=int, default=cpu_count(), help="Number of threads (default: number of CPUs)")
     parser.add_argument("-c", "--compression-level", type=int, default=6, help="Compression level (default: 6)")
+    parser.add_argument("-l", "--log", const=True, nargs="?", default=False, help="Show a log of files instead of a progress bar")
     parser.add_argument("source_dir", help="Source directory containing region files")
     parser.add_argument("destination_dir", help="Destination directory to store converted region files")
 
@@ -65,10 +69,21 @@ if __name__ == "__main__":
     compression_level = args.compression_level
     source_dir = args.source_dir
     destination_dir = args.destination_dir
+    log = args.log
 
     file_ext = "*.linear" if args.conversion_mode == "linear2mca" else "*.mca"
     file_list = glob(os.path.join(source_dir, file_ext))
     print("Found", len(file_list), "files to convert")
 
-    pool = Pool(threads)
-    pool.map(convert_file, [(file, args.conversion_mode, destination_dir, compression_level) for file in file_list])
+    with Manager() as manager:
+        converted_counter = manager.Value("i", 0)
+        skipped_counter = manager.Value("i", 0)
+        pool = Pool(threads)
+        progress_bar = None
+        if not log:
+            progress_bar = tqdm(total=len(file_list), desc="Converting files")
+        for _ in pool.imap_unordered(convert_file, [(file, args.conversion_mode, destination_dir, compression_level, converted_counter, skipped_counter, log) for file in file_list]):
+            if progress_bar:
+                progress_bar.update(1)
+        if progress_bar: progress_bar.close()
+        print(f"Conversion complete: {converted_counter.value} region files converted, {skipped_counter.value} region files skipped")
