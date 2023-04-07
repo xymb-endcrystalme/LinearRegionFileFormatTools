@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-
-from linear import Chunk, Region, write_region_linear, open_region_anvil
+from linear import write_region_linear, open_region_anvil
 
 filename_anvil = sys.argv[1]
 filename = filename_anvil.rpartition('.')[0] + ".linear"

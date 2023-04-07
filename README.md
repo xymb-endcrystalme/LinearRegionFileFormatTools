@@ -62,32 +62,25 @@ All plugins that use NMS or Bukkit (ex. Chunky) will work.
 
 ## Python prerequisites:
 
-```apt install python3-pip
-pip3 install pyzstd xxhash
+```
+apt install python3-pip
+pip3 install -r requirements.txt
 ```
 
 ## Usage:
 
-```./mca_to_linear.py r.0.0.mca```
+```
+./convert_region_files.py mca2linear /home/xymb/minecraft/world/region /tmp/out/world/region
+Found 18 region files to convert
+Converting files: 100%|█████████████████████████████████████████████████████████████████████████████████| 18/18 [00:12<00:00,  1.49it/s]
+Conversion complete: 18 region files converted, 0 region files skipped
+```
 
-Will create r.0.0.linear in the same directory
-
-
-
-```./linear_to_mca.py r.0.0.linear```
-
-Will create r.0.0.mca in the same directory
-
-
-
-```./linear_to_mca_directory.py threads compression_level source_dir destination_dir```
-
+First argument is *mca2linear* or *linear2mca* depending on which way the conversion is being done.
 
 Suggested compression level is 6. Suggested threads is the amount of cores of the CPU.
 
-This command converts all ```.mca``` files from source_dir to ```.linear``` in the destination_dir.
-
-It checks file modification date, so you can convert 99% of your world at your leasure, and then finish the last 1% when the server is offline, thus achieving 5min downtime.
+The converter checks file modification date, so you can convert 99% of your world at your leasure, and then finish the last 1% when the server is offline, thus achieving 5min downtime.
 
 ## Results:
 

@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     file_ext = "*.linear" if args.conversion_mode == "linear2mca" else "*.mca"
     file_list = glob(os.path.join(source_dir, file_ext))
-    print("Found", len(file_list), "files to convert")
+    print("Found", len(file_list), "region files to convert")
 
     with Manager() as manager:
         converted_counter = manager.Value("i", 0)
