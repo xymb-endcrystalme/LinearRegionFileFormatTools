@@ -2,7 +2,6 @@ import os
 import struct
 import pyzstd
 import zlib
-import xxhash
 
 class Chunk:
     def __init__(self, raw_chunk, x, z):
@@ -32,6 +31,8 @@ EXTERNAL_FILE_COMPRESSION_TYPE = 128 + 2
 LINEAR_SIGNATURE = 0xc3ff13183cca9d9a
 LINEAR_VERSION = 1
 
+# TODO: Alert users if the file name isn't r.0.0.linear
+
 def open_region_linear(file_path):
     HEADER_SIZE = REGION_DIMENSION * REGION_DIMENSION * 8
 
@@ -41,7 +42,7 @@ def open_region_linear(file_path):
     raw_region = open(file_path, 'rb').read()
     mtime = os.path.getmtime(file_path)
 
-    signature, version, newest_timestamp, compression_level, chunk_count, complete_region_length, hash64 = struct.unpack_from(">QBQbhIQ", raw_region, 0)
+    signature, version, newest_timestamp, compression_level, chunk_count, complete_region_length, reserved = struct.unpack_from(">QBQbhIQ", raw_region, 0)
 
     if signature != LINEAR_SIGNATURE:
         raise Exception("Superblock invalid")
@@ -125,7 +126,7 @@ def write_region_linear(destination_filename, region: Region, compression_level=
             chunks.append(b"")
 
     complete_region = b''.join(inside_header) + b''.join(chunks)
-    complete_region_hash = xxhash.xxh64(complete_region).digest()
+    complete_region_hash = b"\x00" * 8
 
     option = {pyzstd.CParameter.compressionLevel : compression_level,
                 pyzstd.CParameter.checksumFlag : 1}
@@ -134,6 +135,7 @@ def write_region_linear(destination_filename, region: Region, compression_level=
     preheader = struct.pack(">QBQbhI", LINEAR_SIGNATURE, LINEAR_VERSION, newest_timestamp, compression_level, chunk_count, len(complete_region))
     footer = struct.pack(">Q", LINEAR_SIGNATURE)
 
+    print("WRITE HASH", complete_region_hash)
     final_region_file = preheader + complete_region_hash + complete_region + footer
 
     with open(destination_filename + ".wip", "wb") as f:

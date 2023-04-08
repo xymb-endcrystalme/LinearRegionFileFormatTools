@@ -1,3 +1,2 @@
 pyzstd
-xxhash
 tqdm
