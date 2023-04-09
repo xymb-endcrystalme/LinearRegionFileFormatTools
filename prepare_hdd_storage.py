@@ -12,6 +12,7 @@ class CustomArgumentParser(argparse.ArgumentParser):
         sys.exit(1)
 
 def main(source_dir, dest_dir, cutoff_date):
+    print(f"Preparing a file list from {source_dir}, this can take a minute.")
     files = os.listdir(source_dir)
     files_to_copy = [f for f in files if f.endswith(".linear")]
 

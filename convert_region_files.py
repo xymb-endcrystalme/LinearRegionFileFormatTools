@@ -60,7 +60,7 @@ if __name__ == "__main__":
     parser.add_argument("conversion_mode", choices=["mca2linear", "linear2mca"], help="Conversion direction: mca2linear or linear2mca")
     parser.add_argument("-t", "--threads", type=int, default=cpu_count(), help="Number of threads (default: number of CPUs)")
     parser.add_argument("-c", "--compression-level", type=int, default=6, help="Zstd compression level (default: 6)")
-    parser.add_argument("-l", "--log", const=True, nargs="?", default=False, help="Show a log of files instead of a progress bar")
+    parser.add_argument("-l", "--log", action='store_true', help="Show a log of files instead of a progress bar")
     parser.add_argument("source_dir", help="Source directory containing region files")
     parser.add_argument("destination_dir", help="Destination directory to store converted region files")
 
