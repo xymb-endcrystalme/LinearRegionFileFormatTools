@@ -64,9 +64,9 @@ def main(source_dir, dest_dir, cutoff_date):
 
 if __name__ == "__main__":
     parser = CustomArgumentParser(description="Copy files with certain conditions")
+    parser.add_argument("cutoff", type=str, help="Cutoff date in the format YYYY-MM-DD")
     parser.add_argument("source", type=str, help="Source directory")
     parser.add_argument("destination", type=str, help="Destination directory")
-    parser.add_argument("cutoff", type=str, help="Cutoff date in the format YYYY-MM-DD")
 
     args = parser.parse_args()
 
