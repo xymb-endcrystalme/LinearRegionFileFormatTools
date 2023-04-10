@@ -24,10 +24,12 @@ def main(args):
         raise ValueError(f"Server directory {server_dir} does not exist or is not a directory.")
     if not os.path.isdir(storage_dir):
         raise ValueError(f"Storage directory {storage_dir} does not exist or is not a directory.")
-    server_files = [f for f in os.listdir(server_dir) if os.path.isfile(os.path.join(server_dir, f))]
+    print(f"Preparing a file list from {server_dir}, this can take a minute.")
+    server_files = [f for f in os.listdir(server_dir)]
+    print(f"Done.")
     progress_bar = tqdm(total=len(server_files), desc="Processing files", disable=args.verbose)
 
-    for file_name in server_files:
+    for i, file_name in enumerate(server_files):
         if file_name.endswith(".linear") and not os.path.islink(os.path.join(server_dir, file_name)):
             moved = False
             server_file_path = os.path.join(server_dir, file_name)
@@ -42,11 +44,11 @@ def main(args):
                     if tmp_file_stat.st_mtime == storage_file_stat.st_mtime and tmp_file_stat.st_size == storage_file_stat.st_size:
                         shutil.move(tmp_file_path, server_file_path)
                         moved = True
-                        if args.verbose: print(f"Moved {file_name} to {storage_dir}")
+                        if args.verbose: print(f"{i}/{len(server_files)} - moved {file_name} to {storage_dir}")
                         if args.slow: sleep(args.slow)
 
             if moved == False and args.verbose:
-                    print(f"Ignoring {file_name}")
+                print(f"{i}/{len(server_files)} - ignoring {file_name}")
             progress_bar.update(1)
     progress_bar.close()
 
