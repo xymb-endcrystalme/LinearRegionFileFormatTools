@@ -49,8 +49,8 @@ def main(args):
 
             if moved == False and args.verbose:
                 print(f"{i}/{len(server_files)} - ignoring {file_name}")
-            progress_bar.update(1)
         if args.slow: sleep(args.slow / 100) # Slow down somewhat even if just looping
+        progress_bar.update(1)
     progress_bar.close()
 
 if __name__ == "__main__":
