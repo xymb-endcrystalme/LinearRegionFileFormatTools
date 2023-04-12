@@ -127,15 +127,18 @@ class LinearToMCA(Operations):
         return path
     
     def access(self, path, mode):
+        return
         full_path = self._full_path(path)
         if not os.access(full_path, mode):
             raise FuseOSError(errno.EACCES)
 
     def chmod(self, path, mode):
+        return
         full_path = self._full_path(path)
         return os.chmod(full_path, mode)
 
     def chown(self, path, uid, gid):
+        return
         full_path = self._full_path(path)
         return os.chown(full_path, uid, gid)
 
@@ -180,13 +183,16 @@ class LinearToMCA(Operations):
             return pathname
 
     def mknod(self, path, mode, dev):
+        return
         return os.mknod(self._full_path(path), mode, dev)
 
     def rmdir(self, path):
+        return
         full_path = self._full_path(path)
         return os.rmdir(full_path)
 
     def mkdir(self, path, mode):
+        return
         return os.mkdir(self._full_path(path), mode)
 
     def statfs(self, path):
@@ -198,18 +204,23 @@ class LinearToMCA(Operations):
             'f_frsize', 'f_namemax'))
 
     def unlink(self, path):
+        return
         return os.unlink(self._full_path(path))
 
     def symlink(self, name, target):
+        return
         return os.symlink(target, self._full_path(name))
 
     def rename(self, old, new):
+        return
         return os.rename(self._full_path(old), self._full_path(new))
 
     def link(self, target, name):
+        return
         return os.link(self._full_path(name), self._full_path(target))
 
     def utimens(self, path, times=None):
+        return
         return os.utime(self._full_path(path), times)
 
     # File methods
@@ -231,6 +242,7 @@ class LinearToMCA(Operations):
         return retval
 
     def create(self, path, mode, fi=None):
+        return
         uid, gid, pid = fuse_get_context()
         full_path = self._full_path(path)
         fd = os.open(full_path, os.O_WRONLY | os.O_CREAT, mode)
@@ -248,6 +260,7 @@ class LinearToMCA(Operations):
         return 
 
     def write(self, path, buf, offset, fh):
+        return
         os.lseek(fh, offset, os.SEEK_SET)
         return os.write(fh, buf)
 
@@ -257,7 +270,7 @@ class LinearToMCA(Operations):
             f.truncate(length)
 
     def flush(self, path, fh):
-        return None
+        return
         print("flush called with path: " + path + " fh: " + str(fh))
         retval = os.fsync(fh)
         print("RETVAL flush ", retval)
@@ -274,12 +287,14 @@ class LinearToMCA(Operations):
         return retval
 
     def fsync(self, path, fdatasync, fh):
+        return
         print("fsync called with path: " + path + " fdatasync: " + str(fdatasync) + " fh: " + str(fh))
         return self.flush(path, fh)
 
 def main(mountpoint, root):
     linear_file_cache = LinearFileCache(100)
-    FUSE(LinearToMCA(root, linear_file_cache), mountpoint, nothreads=True, foreground=True, allow_other=False, ro=True)
+#    FUSE(LinearToMCA(root, linear_file_cache), mountpoint, nothreads=True, foreground=True, allow_other=False, ro=True)
+    FUSE(LinearToMCA(root, linear_file_cache), mountpoint, nothreads=True, foreground=True, allow_other=False, ro=False)
 
 if __name__ == '__main__':
     main(sys.argv[2], sys.argv[1])
