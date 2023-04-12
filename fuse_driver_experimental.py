@@ -298,3 +298,24 @@ def main(mountpoint, root):
 
 if __name__ == '__main__':
     main(sys.argv[2], sys.argv[1])
+'''
+import argparse
+
+def main():
+    parser = argparse.ArgumentParser(description="Fuse program for mounting a read-only file system. The program doesn't support writing files, only reading them.")
+
+    parser.add_argument("server_directory", type=str, help="Server directory to be mounted")
+    parser.add_argument("mountpoint", type=str, help="Mount point for the server directory")
+
+    parser.add_argument("-b", "--background", action="store_true", default=False, help="Run the program in the background (default: off)")
+    parser.add_argument("-a", "--allow_other", action="store_true", default=False, help="Allow other users to access the mounted directory (default: off)")
+    parser.add_argument("-c", "--cache_size", type=int, default=100, help="Cache size (default: 100)")
+
+    args = parser.parse_args()
+
+    # Your Fuse program implementation here
+    # Example: mount_fuse(args.server_directory, args.mountpoint, args.background, args.allow_other, args.cache_size)
+
+if __name__ == "__main__":
+    main()
+'''
