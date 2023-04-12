@@ -244,3 +244,41 @@ def write_region_anvil(destination_filename, region: Region, compression_level=z
     os.utime(destination_filename + ".wip", (region.mtime, region.mtime))
     os.rename(destination_filename + ".wip", destination_filename)
 
+
+def write_region_anvil_to_bytes(region: Region, compression_level=zlib.Z_DEFAULT_COMPRESSION): # CAREFUL: Doesn't support MCC!
+    SECTOR = 4096
+
+    header_chunks = []
+    header_timestamps = []
+    sectors = []
+    start_sectors = []
+    free_sector = 2
+
+    for i in range(REGION_DIMENSION * REGION_DIMENSION):
+        start_sectors.append(free_sector)
+        if region.chunks[i] != None:
+            compressed = zlib.compress(region.chunks[i].raw_chunk, compression_level)
+            final_chunk_data = struct.pack(">I", len(compressed) + 1) + COMPRESSION_TYPE + compressed
+
+            padding = 4096 - (len(final_chunk_data) % 4096)
+            if padding == 4096:
+                padding = 0
+            final_chunk_data += b'\x00' * padding
+
+            sector_count = len(final_chunk_data) // 4096
+            sectors.append(final_chunk_data)
+            free_sector += sector_count
+        else:
+            sectors.append(b'')
+
+    for i in range(REGION_DIMENSION * REGION_DIMENSION):
+        if region.chunks[i] != None:
+            sector_count = len(sectors[i]) // 4096
+            header_chunks.append(struct.pack(">IB", start_sectors[i], sector_count)[1:])
+        else:
+            header_chunks.append(b"\x00\x00\x00\x00")
+
+    for i in range(REGION_DIMENSION * REGION_DIMENSION):
+        header_timestamps.append(struct.pack(">I", region.timestamps[i]))
+
+    return b''.join(header_chunks) + b''.join(header_timestamps) + b''.join(sectors)
