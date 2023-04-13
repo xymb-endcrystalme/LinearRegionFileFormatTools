@@ -29,12 +29,14 @@
 import os
 import sys
 import errno
+import time
+import zlib
 
 from fuse import FUSE, FuseOSError, Operations, fuse_get_context
 from collections import OrderedDict
 from linear import open_region_linear, write_region_anvil_to_bytes
 
-MCA_FILES_SIZE = 10 * 1024 * 1024
+MCA_FILES_SIZE = 20 * 1024 * 1024
 
 class LinearFileCache:
     FILE_DESCRIPTOR_THRESHOLD = 1000
@@ -49,9 +51,10 @@ class LinearFileCache:
     def create_file(self, path_linear):
 #        region = open(path_linear, "rb").read()
 #            content = file.read()
+        start = time.time()
         region = open_region_linear(path_linear)
-        retval = write_region_anvil_to_bytes(region)
-        print(len(retval))
+        retval = write_region_anvil_to_bytes(region, compression_level=zlib.Z_BEST_SPEED)
+        print("GENERATING ", len(retval), path_linear, (time.time() - start)*1000, "ms")
         return retval
         # Create a 10MB bytes array
 #        content = bytearray(10 * 1024 * 1024)
@@ -63,6 +66,8 @@ class LinearFileCache:
         if not os.path.isfile(path_linear):
             raise FileNotFoundError(f"File {path_linear} does not exist.")
 
+        print("Found", path_linear in self.cache)
+        print("Cache contents:", self.cache.keys())
         if path_linear not in self.cache:
             if len(self.cache) >= self.cache_size:
                 oldest_file_path, _ = self.cache.popitem(last=False)
@@ -83,7 +88,7 @@ class LinearFileCache:
             path_linear = self.file_handle_to_path[file_handle]
             self.file_references[path_linear] -= 1
 
-            if self.file_references[path_linear] == 0:
+            if self.file_references[path_linear] == 0 and len(self.cache) >= self.cache_size:
                 self.cache.pop(path_linear)
                 self.file_references.pop(path_linear)
 
@@ -96,7 +101,7 @@ class LinearFileCache:
             if path_linear in self.cache:
                 file_data = self.cache[path_linear]
 #                print("aaa", len(file_data))
-#                print(f"Read {length} bytes from {path_linear} at offset {offset}.", file_data[offset:offset + length])
+#                print(f"Read {length} bytes from {path_linear} at offset {offset}.")#, file_data[offset:offset + length])
                 return file_data[offset:offset + length]
             else:
                 raise FileNotFoundError(f"File {path_linear} not found in cache.")
@@ -143,7 +148,7 @@ class LinearToMCA(Operations):
         return os.chown(full_path, uid, gid)
 
     def getattr(self, path, fh=None):
-        print("getattr called with path: " + path)
+#        print("getattr called with path: " + path)
         full_path = self._full_path(path)
         if path.endswith(".mca"):
             real_file = full_path[:-4] + ".linear"
@@ -228,13 +233,15 @@ class LinearToMCA(Operations):
 
     def open(self, path, flags):
         print("open called with path: " + path)
+        start = time.time()
         full_path = self._full_path(path)
 #        return os.open(full_path, flags)
-        
+
         if path.endswith(".mca"):
             real_file = full_path[:-4] + ".linear"
             file_handle = self.linear_file_cache.open(real_file)
 #            print("file_handle:", file_handle)
+            print("open time:", time.time() - start)
             return file_handle
 
         retval = os.open(full_path, flags)
@@ -251,9 +258,11 @@ class LinearToMCA(Operations):
 
     def read(self, path, length, offset, fh):
 #        print("read called with path:", path, "length:", length, "offset:", offset, "fh:", fh)
+        start = time.time()
         if path.endswith(".mca"):
             retval = self.linear_file_cache.read(fh, length, offset)
 #            print("read retval:", retval)
+            #print("read time:", time.time() - start)
             return retval
         os.lseek(fh, offset, os.SEEK_SET)
         return os.read(fh, length)
