@@ -29,6 +29,7 @@ COMPRESSION_TYPE = b'\x02'
 COMPRESSION_TYPE_ZLIB = 2
 EXTERNAL_FILE_COMPRESSION_TYPE = 128 + 2
 LINEAR_SIGNATURE = 0xc3ff13183cca9d9a
+SUPPORTED_VERSION = [1, 2]
 LINEAR_VERSION = 1
 
 # TODO: Alert users if the file name isn't r.0.0.linear
@@ -46,7 +47,7 @@ def open_region_linear(file_path):
 
     if signature != LINEAR_SIGNATURE:
         raise Exception("Superblock invalid")
-    if version != LINEAR_VERSION:
+    if version not in SUPPORTED_VERSION:
         raise Exception("Version invalid")
 
     signature = struct.unpack(">Q", raw_region[-8:])[0]
@@ -94,7 +95,7 @@ def quickly_verify_linear(file_path):
 
     if signature != LINEAR_SIGNATURE:
         return False
-    if version != LINEAR_VERSION:
+    if version not in SUPPORTED_VERSION:
         return False
 
     signature = struct.unpack(">Q", raw_region[-8:])[0]
