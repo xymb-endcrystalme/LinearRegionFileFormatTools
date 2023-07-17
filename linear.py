@@ -2,11 +2,23 @@ import os
 import struct
 import pyzstd
 import zlib
+import nbtlib
+import io
 
 class Chunk:
     def __init__(self, raw_chunk, x, z):
         self.raw_chunk = raw_chunk
         self.x, self.z = x, z
+
+    def as_nbtlib(self):
+        fileobj = io.BytesIO(self.raw_chunk)
+        file = nbtlib.File.parse(fileobj)
+        return file
+
+    def from_nbtlib(self, nbtlib_obj):
+        fileobj = io.BytesIO()
+        nbtlib_obj.write(fileobj)
+        self.raw_chunk = fileobj.getvalue()
 
     def __str__(self):
         return "Chunk %d %d - %d bytes" % (self.x, self.z, len(self.raw_chunk))
@@ -136,7 +148,6 @@ def write_region_linear(destination_filename, region: Region, compression_level=
     preheader = struct.pack(">QBQbhI", LINEAR_SIGNATURE, LINEAR_VERSION, newest_timestamp, compression_level, chunk_count, len(complete_region))
     footer = struct.pack(">Q", LINEAR_SIGNATURE)
 
-    print("WRITE HASH", complete_region_hash)
     final_region_file = preheader + complete_region_hash + complete_region + footer
 
     with open(destination_filename + ".wip", "wb") as f:
