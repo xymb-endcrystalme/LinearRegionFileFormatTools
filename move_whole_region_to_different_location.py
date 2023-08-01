@@ -25,13 +25,38 @@ def move_region(source_filename, destination_filename):
     print("Coord difference:", block_diff_x, block_diff_z)
     print("Chunk difference:", chunk_diff_x, chunk_diff_z)
 
+    def move_entity(entity):
+        if 'TileX' in entity: entity['TileX'] = nbtlib.Int(int(entity['TileX'] + block_diff_x))
+        if 'TileZ' in entity: entity['TileZ'] = nbtlib.Int(int(entity['TileZ'] + block_diff_z))
+
+        if 'HomePosX' in entity: entity['HomePosX'] = nbtlib.Int(int(entity['HomePosX'] + block_diff_x))
+        if 'HomePosZ' in entity: entity['HomePosZ'] = nbtlib.Int(int(entity['HomePosZ'] + block_diff_z))
+
+        if 'Paper.Origin' in entity:
+            entity['Paper.Origin'][0] = nbtlib.Double(float(entity['Paper.Origin'][0]) + block_diff_x)
+            entity['Paper.Origin'][2] = nbtlib.Double(float(entity['Paper.Origin'][2]) + block_diff_z)
+
+        entity['Pos'][0] = nbtlib.Double(float(entity['Pos'][0]) + block_diff_x)
+        entity['Pos'][2] = nbtlib.Double(float(entity['Pos'][2]) + block_diff_z)
+
+        if 'UUID' in entity:
+            entity['UUID'] = nbtlib.IntArray([random.randint(-2**31, 2**31), random.randint(-2**31, 2**31), random.randint(-2**31, 2**31), random.randint(-2**31, 2**31)])
+
+        # Verify
+        if not chunk.x * 16 <= float(entity['Pos'][0]) < (chunk.x + 1) * 16: raise Exception("Block entity coord mismatch X " + str(chunk.x * 16) + " " + str(entity['Pos'][0]))
+        if not chunk.z * 16 <= float(entity['Pos'][2]) < (chunk.z + 1) * 16: raise Exception("Block entity coord mismatch Z " + str(chunk.z * 16) + " " + str(entity['Pos'][2]))
+
+        if 'Passengers' in entity:
+            for subentity in entity['Passengers']: move_entity(subentity)
+
     region = open_region_linear(source_filename)
-    for chunk in region.chunks:
+    for i, chunk in enumerate(region.chunks):
         if chunk == None: continue
 
         nbt = chunk.as_nbtlib()
         is_region = 'xPos' in nbt
         is_entities = 'Entities' in nbt
+        is_strange_entities = 'entities' in nbt
         if is_region:
             chunk_x, chunk_z = int(nbt['xPos']), int(nbt['zPos'])
 #            print("Region chunk:", chunk_x, chunk_z)
@@ -61,7 +86,7 @@ def move_region(source_filename, destination_filename):
                     if not chunk.x * 16 <= x < (chunk.x + 1) * 16: raise Exception("Block entity coord mismatch X " + str(chunk.x * 16) + " " + str(x))
                     if not chunk.z * 16 <= z < (chunk.z + 1) * 16: raise Exception("Block entity coord mismatch Z " + str(chunk.z * 16) + " " + str(z))
 
-        elif is_entities:
+        if is_entities:
             chunk_x, chunk_z = int(nbt['Position'][0]), int(nbt['Position'][1])
             print("Entities chunk:", chunk_x, chunk_z)
             if chunk_x != chunk.x or chunk_z != chunk.z:
@@ -70,31 +95,11 @@ def move_region(source_filename, destination_filename):
             nbt['Position'] = nbtlib.IntArray([nbtlib.Int(int(nbt['Position'][0]) + chunk_diff_x), nbtlib.Int(int(nbt['Position'][1]) + chunk_diff_z)])
             chunk.x, chunk.z = int(nbt['Position'][0]), int(nbt['Position'][1])
 
-            def move_entity(entity):
-                if 'TileX' in entity: entity['TileX'] = nbtlib.Int(int(entity['TileX'] + block_diff_x))
-                if 'TileZ' in entity: entity['TileZ'] = nbtlib.Int(int(entity['TileZ'] + block_diff_z))
-
-                if 'HomePosX' in entity: entity['HomePosX'] = nbtlib.Int(int(entity['HomePosX'] + block_diff_x))
-                if 'HomePosZ' in entity: entity['HomePosZ'] = nbtlib.Int(int(entity['HomePosZ'] + block_diff_z))
-
-                if 'Paper.Origin' in entity:
-                    entity['Paper.Origin'][0] = nbtlib.Double(float(entity['Paper.Origin'][0]) + block_diff_x)
-                    entity['Paper.Origin'][2] = nbtlib.Double(float(entity['Paper.Origin'][2]) + block_diff_z)
-
-                entity['Pos'][0] = nbtlib.Double(float(entity['Pos'][0]) + block_diff_x)
-                entity['Pos'][2] = nbtlib.Double(float(entity['Pos'][2]) + block_diff_z)
-
-                if 'UUID' in entity:
-                    entity['UUID'] = nbtlib.IntArray([random.randint(-2**31, 2**31), random.randint(-2**31, 2**31), random.randint(-2**31, 2**31), random.randint(-2**31, 2**31)])
-
-                # Verify
-                if not chunk.x * 16 <= float(entity['Pos'][0]) < (chunk.x + 1) * 16: raise Exception("Block entity coord mismatch X " + str(chunk.x * 16) + " " + str(entity['Pos'][0]))
-                if not chunk.z * 16 <= float(entity['Pos'][2]) < (chunk.z + 1) * 16: raise Exception("Block entity coord mismatch Z " + str(chunk.z * 16) + " " + str(entity['Pos'][2]))
-
-                if 'Passengers' in entity:
-                    for subentity in entity['Passengers']: move_entity(subentity)
-
             for entity in nbt['Entities']:
+                move_entity(entity)
+
+        if is_strange_entities:
+            for entity in nbt['entities']:
                 move_entity(entity)
 
         chunk.from_nbtlib(nbt)
