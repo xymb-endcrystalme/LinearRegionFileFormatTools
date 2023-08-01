@@ -106,7 +106,7 @@ def move_region(source_filename, destination_filename):
 source_center = sys.argv[1]
 destination_center = sys.argv[2]
 
-source_base = destination_center.rpartition("/")[0]
+source_base = source_center.rpartition("/")[0]
 destination_base = destination_center.rpartition("/")[0]
 
 dest_center_coords = destination_center.split("/")[-1].split(".")
