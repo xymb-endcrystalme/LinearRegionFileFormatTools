@@ -43,11 +43,12 @@ for chunk in region.chunks:
         nbt['zPos'] = nbtlib.Int(int(nbt['zPos']) + chunk_diff_z)
         chunk.x, chunk.z = int(nbt['xPos']), int(nbt['zPos'])
 
-        for start in nbt['structures']['starts']:
-            structure = nbt['structures']['starts'][start]
+        if 'starts' in nbt['structures']:
+            for start in nbt['structures']:
+                structure = nbt['structures']['starts'][start]
 
-            structure["ChunkX"] = nbtlib.Int(int(structure["ChunkX"]) + chunk_diff_x)
-            structure["ChunkZ"] = nbtlib.Int(int(structure["ChunkZ"]) + chunk_diff_z)
+                structure["ChunkX"] = nbtlib.Int(int(structure["ChunkX"]) + chunk_diff_x)
+                structure["ChunkZ"] = nbtlib.Int(int(structure["ChunkZ"]) + chunk_diff_z)
 
         for block_entity in nbt["block_entities"]:
             x, z = int(block_entity["x"]), int(block_entity["z"])

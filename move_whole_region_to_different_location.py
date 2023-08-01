@@ -42,22 +42,24 @@ def move_region(source_filename, destination_filename):
             nbt['zPos'] = nbtlib.Int(int(nbt['zPos']) + chunk_diff_z)
             chunk.x, chunk.z = int(nbt['xPos']), int(nbt['zPos'])
 
-            for start in nbt['structures']['starts']:
-                structure = nbt['structures']['starts'][start]
+            if 'starts' in nbt['structures']:
+                for start in nbt['structures']['starts']:
+                    structure = nbt['structures']['starts'][start]
 
-                structure["ChunkX"] = nbtlib.Int(int(structure["ChunkX"]) + chunk_diff_x)
-                structure["ChunkZ"] = nbtlib.Int(int(structure["ChunkZ"]) + chunk_diff_z)
+                    structure["ChunkX"] = nbtlib.Int(int(structure["ChunkX"]) + chunk_diff_x)
+                    structure["ChunkZ"] = nbtlib.Int(int(structure["ChunkZ"]) + chunk_diff_z)
 
-            for block_entity in nbt["block_entities"]:
-                x, z = int(block_entity["x"]), int(block_entity["z"])
-                x += block_diff_x
-                z += block_diff_z
-                block_entity["x"] = nbtlib.Int(x)
-                block_entity["z"] = nbtlib.Int(z)
+            if 'block_entities' in nbt:
+                for block_entity in nbt["block_entities"]:
+                    x, z = int(block_entity["x"]), int(block_entity["z"])
+                    x += block_diff_x
+                    z += block_diff_z
+                    block_entity["x"] = nbtlib.Int(x)
+                    block_entity["z"] = nbtlib.Int(z)
 
-                # Verify
-                if not chunk.x * 16 <= x < (chunk.x + 1) * 16: raise Exception("Block entity coord mismatch X " + str(chunk.x * 16) + " " + str(x))
-                if not chunk.z * 16 <= z < (chunk.z + 1) * 16: raise Exception("Block entity coord mismatch Z " + str(chunk.z * 16) + " " + str(z))
+                    # Verify
+                    if not chunk.x * 16 <= x < (chunk.x + 1) * 16: raise Exception("Block entity coord mismatch X " + str(chunk.x * 16) + " " + str(x))
+                    if not chunk.z * 16 <= z < (chunk.z + 1) * 16: raise Exception("Block entity coord mismatch Z " + str(chunk.z * 16) + " " + str(z))
 
         elif is_entities:
             chunk_x, chunk_z = int(nbt['Position'][0]), int(nbt['Position'][1])
