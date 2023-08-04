@@ -72,7 +72,7 @@ def move_region(source_filename, destination_filename):
                 for start in nbt['structures']['starts']:
                     structure = nbt['structures']['starts'][start]
 
-                    # Добавляем проверку наличия ключей 'ChunkX' и 'ChunkZ' и используем метод get для безопасного доступа
+                    # Add a check for 'ChunkX' and 'ChunkZ' keys and use the get method for secure access
                     if 'ChunkX' in structure:
                         structure["ChunkX"] = nbtlib.Int(int(structure.get("ChunkX", 0)) + chunk_diff_x)
                     if 'ChunkZ' in structure:
