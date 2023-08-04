@@ -71,8 +71,10 @@ def move_region(source_filename, destination_filename):
                 for start in nbt['structures']['starts']:
                     structure = nbt['structures']['starts'][start]
 
-                    structure["ChunkX"] = nbtlib.Int(int(structure["ChunkX"]) + chunk_diff_x)
-                    structure["ChunkZ"] = nbtlib.Int(int(structure["ChunkZ"]) + chunk_diff_z)
+                    if 'ChunkX' in structure:
+                        structure["ChunkX"] = nbtlib.Int(int(structure.get("ChunkX", 0)) + chunk_diff_x)
+                    if 'ChunkZ' in structure:
+                        structure["ChunkZ"] = nbtlib.Int(int(structure.get("ChunkZ", 0)) + chunk_diff_z)
 
             if 'block_entities' in nbt:
                 for block_entity in nbt["block_entities"]:
