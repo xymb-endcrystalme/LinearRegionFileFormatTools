@@ -18,6 +18,7 @@ def main(source_dir, dest_dir, cutoff_date):
     skipped_files = 0
     already_exists_files = 0
     symlink_files = 0
+    saved_space = 0
 
     try:
         with os.scandir(source_dir) as it:
@@ -48,6 +49,7 @@ def main(source_dir, dest_dir, cutoff_date):
                         dest_size = os.path.getsize(dest_path)
 
                         if file_mtime > dest_mtime or entry.stat().st_size != dest_size:
+                            saved_space += entry.stat().st_size
                             shutil.copy2(src_path, dest_tmp_path)
                             os.rename(dest_tmp_path, dest_path)
                             copied_files += 1
@@ -62,6 +64,7 @@ def main(source_dir, dest_dir, cutoff_date):
     print(f"Skipped region files: {skipped_files}")
     print(f"Already existing region files: {already_exists_files}")
     print(f"Symlink files ignored: {symlink_files}")
+    print(f"Total HDD space saved: {saved_space} bytes")
 
 if __name__ == "__main__":
     parser = CustomArgumentParser(description="Copy files with certain conditions")
