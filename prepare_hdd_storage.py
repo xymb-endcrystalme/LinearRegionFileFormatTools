@@ -13,8 +13,6 @@ class CustomArgumentParser(argparse.ArgumentParser):
 
 def main(source_dir, dest_dir, cutoff_date):
     print(f"Preparing a file list from {source_dir}, this can take a minute.")
-    files = os.listdir(source_dir)
-    files_to_copy = [f for f in files if f.endswith(".linear")]
 
     copied_files = 0
     skipped_files = 0
@@ -22,39 +20,41 @@ def main(source_dir, dest_dir, cutoff_date):
     symlink_files = 0
 
     try:
-        for file in tqdm(files_to_copy, desc="Copying files"):
-            src_path = os.path.join(source_dir, file)
-            dest_path = os.path.join(dest_dir, file)
-            dest_tmp_path = dest_path + ".tmp"
+        with os.scandir(source_dir) as it:
+            for entry in tqdm(it, desc="Copying files"):
+                if not entry.name.endswith(".linear") or entry.is_symlink():
+                    if entry.is_symlink():
+                        symlink_files += 1
+                    continue
 
-            if os.path.islink(src_path):
-                symlink_files += 1
-                continue
+                src_path = entry.path
+                dest_path = os.path.join(dest_dir, entry.name)
+                dest_tmp_path = dest_path + ".tmp"
 
-            if not os.path.isfile(src_path):
-                skipped_files += 1
-                continue
+                if not entry.is_file():
+                    skipped_files += 1
+                    continue
 
-            file_mtime = os.path.getmtime(src_path)
-            file_datetime = datetime.fromtimestamp(file_mtime)
+                file_mtime = entry.stat().st_mtime
+                file_datetime = datetime.fromtimestamp(file_mtime)
 
-            if file_datetime < cutoff_date:
-                if not os.path.exists(dest_path):
-                    shutil.copy2(src_path, dest_tmp_path)
-                    os.rename(dest_tmp_path, dest_path)
-                    copied_files += 1
-                else:
-                    dest_mtime = os.path.getmtime(dest_path)
-                    dest_size = os.path.getsize(dest_path)
-
-                    if file_mtime > dest_mtime or os.path.getsize(src_path) != dest_size:
+                if file_datetime < cutoff_date:
+                    if not os.path.exists(dest_path):
                         shutil.copy2(src_path, dest_tmp_path)
                         os.rename(dest_tmp_path, dest_path)
                         copied_files += 1
                     else:
-                        already_exists_files += 1
-            else:
-                skipped_files += 1
+                        dest_mtime = os.path.getmtime(dest_path)
+                        dest_size = os.path.getsize(dest_path)
+
+                        if file_mtime > dest_mtime or entry.stat().st_size != dest_size:
+                            shutil.copy2(src_path, dest_tmp_path)
+                            os.rename(dest_tmp_path, dest_path)
+                            copied_files += 1
+                        else:
+                            already_exists_files += 1
+                else:
+                    skipped_files += 1
     except KeyboardInterrupt:
         pass
 
