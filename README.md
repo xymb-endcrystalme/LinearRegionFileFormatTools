@@ -56,6 +56,8 @@ All plugins that use NMS or Bukkit (ex. Chunky) will work.
 
 [Kaiiju](https://github.com/KaiijuMC/Kaiiju) - Fork of Folia optimized for Anarchy servers. The stuff that will soon run on `Endcrystal.me` and `6b6t.org`.
 
+[LeavesMC](https://github.com/LeavesMC/Leaves) - An paper fork that fixes broken vanilla properties.
+
 ## Python prerequisites:
 
 ```
