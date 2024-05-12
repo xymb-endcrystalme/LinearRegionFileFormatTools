@@ -52,7 +52,7 @@ All plugins that use NMS or Bukkit (ex. Chunky) will work.
 
 ## Supported software:
 
-[LinearPurpur](https://github.com/StupidCraft/LinearPurpur) - An up-to-date fork of Purpur that simply implements the newest Linear region file format.
+[LinearPaper](https://github.com/StupidCraft/LinearPaper) - An up-to-date fork of Paper that simply implements the newest Linear region file format.
 
 [Kaiiju](https://github.com/KaiijuMC/Kaiiju) - Fork of Folia optimized for Anarchy servers. The stuff that will soon run on `Endcrystal.me` and `6b6t.org`.
 
