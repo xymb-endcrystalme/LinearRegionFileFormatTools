@@ -10,6 +10,7 @@ This repository hosts tools to convert between `.mca` and `.linear`.
 - Replaces symlinks with files, thus allows caching on HDD
 - Uses slightly more memory than Anvil - it has to store the whole region file in memory for individual chunk access
 - Much simpler format - about 300 lines of code vs about 1000 LoC for Anvil
+- Also serves as a memory test
 
 ## How:
 There are three problems with the default Minecraft region file format (Anvil):

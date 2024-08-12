@@ -1,0 +1,5 @@
+zstd region files
+r.0.0_oversized_0_1.nbt & r.0.0.oversized.nbt are ignored, fix it.
+
+Fix documentation
+Make proper tooling
