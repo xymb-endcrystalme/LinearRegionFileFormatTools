@@ -4,6 +4,7 @@ import pyzstd
 import zlib
 import nbtlib
 import io
+import xxhash
 
 class Chunk:
     def __init__(self, raw_chunk, x, z):
@@ -55,7 +56,7 @@ def open_region_linear(file_path):
     raw_region = open(file_path, 'rb').read()
     mtime = os.path.getmtime(file_path)
 
-    signature, version, newest_timestamp, compression_level, chunk_count, complete_region_length, reserved = struct.unpack_from(">QBQbhIQ", raw_region, 0)
+    signature, version, newest_timestamp, compression_level, chunk_count, complete_region_length, complete_region_hash = struct.unpack_from(">QBQbhIQ", raw_region, 0)
 
     if signature != LINEAR_SIGNATURE:
         raise Exception("Superblock invalid")
@@ -68,6 +69,9 @@ def open_region_linear(file_path):
         raise Exception("Footer signature invalid")
 
     decompressed_region = pyzstd.decompress(raw_region[32:-8])
+
+    if complete_region_hash != 0 and complete_region_hash != xxhash.xxh64_intdigest(decompressed_region):
+        raise Exception("Data hash invalid")
 
     sizes = []
     timestamps = []
@@ -139,7 +143,7 @@ def write_region_linear(destination_filename, region: Region, compression_level=
             chunks.append(b"")
 
     complete_region = b''.join(inside_header) + b''.join(chunks)
-    complete_region_hash = b"\x00" * 8
+    complete_region_hash = xxhash.xxh64_digest(complete_region)
 
     option = {pyzstd.CParameter.compressionLevel : compression_level,
                 pyzstd.CParameter.checksumFlag : 1}
