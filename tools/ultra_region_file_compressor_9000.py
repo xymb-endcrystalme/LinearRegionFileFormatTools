@@ -14,7 +14,7 @@ def get_file_size(file_path):
     return os.path.getsize(file_path)
 
 def main():
-    input_file = "/tmp/r.0.10030.linear"
+    input_file = "/tmp/r.0.102.linear"
     output_file = "/tmp/result.linear"
 
     # Get initial file size
@@ -27,7 +27,7 @@ def main():
     region = mclinear.open_region_linear(input_file)
     
     # Write the compressed region file
-    mclinear.write_region_linear_v2(output_file, region)
+    mclinear.write_region_linear_v2(output_file, region, compression_level=9)
     
     end_time = time.time()
 
@@ -36,14 +36,14 @@ def main():
 
     # Calculate compression time and ratio
     compression_time = end_time - start_time
-    compression_ratio = initial_size / final_size
+    compression_ratio = final_size / initial_size
 
     # Print summary
     print(f"Compression Summary:")
     print(f"Initial file size: {initial_size:,} bytes")
     print(f"Final file size: {final_size:,} bytes")
     print(f"Compression time: {compression_time:.2f} seconds")
-    print(f"Compression ratio: {compression_ratio:.2f}:1")
+    print(f"Compression ratio: {compression_ratio:.2f}")
 
 if __name__ == "__main__":
     main()
