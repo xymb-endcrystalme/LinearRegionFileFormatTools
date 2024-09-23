@@ -25,6 +25,9 @@ def main():
             palette_size = len(section["block_states"]["palette"])
             print("Palette size", palette_size)
             print("aaa", section["block_states"]["data"])
+            print("toList", section["block_states"]["data"].tolist())
+
+            int_list = section["block_states"]["data"].tolist()
 
 
 if __name__ == "__main__":
