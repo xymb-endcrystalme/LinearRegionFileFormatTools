@@ -3,12 +3,14 @@
 import sys
 import os
 import time
+import math
 
 # Add the parent directory to the Python path
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, parent_dir)
 
 import mclinear
+from tools.simplebitstorage import SimpleBitStorage
 
 def get_file_size(file_path):
     return os.path.getsize(file_path)
@@ -28,7 +30,20 @@ def main():
             print("toList", section["block_states"]["data"].tolist())
 
             int_list = section["block_states"]["data"].tolist()
-
+            
+            # Calculate bits per block
+            bits_per_block = max(4, math.ceil(math.log2(palette_size)))
+            
+            # Create SimpleBitStorage
+            storage = SimpleBitStorage(bits_per_block, 4096, int_list)
+            
+            # Decode and print all values
+            decoded_values = []
+            storage.get_all(lambda value: decoded_values.append(value))
+            
+            print("Decoded values:")
+            for i, value in enumerate(decoded_values):
+                print(f"Block {i}: {value}")
 
 if __name__ == "__main__":
     main()
