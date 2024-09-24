@@ -80,8 +80,9 @@ def main():
                 section["block_states"]["data"] = nbtlib.tag.LongArray(second_storage.get_raw())
                 if section["Y"] == 1:
                     print("Buckets:")
-                    for i, bucket in enumerate(buckets):
-                        print(buckets[i], section["block_states"]["palette"][i]["Name"])
+                    sorted_buckets = sorted(enumerate(buckets), key=lambda x: x[1], reverse=True)
+                    for i, bucket in sorted_buckets:
+                        print(bucket, section["block_states"]["palette"][i]["Name"])
 
 #                print()
 #                print("a", int_list)
