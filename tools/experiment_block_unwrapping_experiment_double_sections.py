@@ -105,7 +105,8 @@ def main():
 
             print(final_storage.get_raw())
 
-
+            final_palette_mappings = {v: total_palette[k] for k, v in palette_mappings.items()}
+            print("Final palette mappings:", final_palette_mappings)
 
 #            section["block_states"]["data"] = nbtlib.tag.LongArray(final_storage.get_raw())
 
