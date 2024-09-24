@@ -50,14 +50,15 @@ def main():
                     x = remainder // 16
                     z = remainder % 16
                     print(f"Block {i} - {x} {y} {z}: {value}")
-            '''
             # Convert to SecondBitStorage
             second_storage = SecondBitStorage(bits_per_block, 4096)
             for i, value in enumerate(decoded_values):
                 second_storage.set(i, value)
             print("\nSecondBitStorage get_raw():")
             print(second_storage.get_raw())
-            '''
+
+            # Update the NBT data with the new SecondBitStorage data
+            section["block_states"]["data"] = nbtlib.tag.LongArray(second_storage.get_raw())
 
 if __name__ == "__main__":
     main()
