@@ -113,9 +113,9 @@ def main():
                 complete_list = []
 
                 for i in range(4096):
-                    x = i & 15
-                    y = (i >> 4) & 15
-                    z = (i >> 8) & 15
+                    y = i & 15
+                    z = (i >> 4) & 15
+                    x = (i >> 8) & 15
 
                     hilbert_index = hilbert3d_index(x, y, z)
                     value = decoded_values[i]
@@ -123,9 +123,9 @@ def main():
                     second_storage.set(hilbert_index, value)
                     buckets[value] += 1
 
-                print(f"Number of unique indices: {len(set(complete_list))}")
-                print(f"Min index: {min(complete_list)}, Max index: {max(complete_list)}")
-                print(f"First 20 sorted indices: {sorted(complete_list)[:20]}")
+#                print(f"Number of unique indices: {len(set(complete_list))}")
+#                print(f"Min index: {min(complete_list)}, Max index: {max(complete_list)}")
+#                print(f"First 20 sorted indices: {sorted(complete_list)[:20]}")
 
                 section["block_states"]["data"] = nbtlib.tag.LongArray(second_storage.get_raw())
                 largest = 0
