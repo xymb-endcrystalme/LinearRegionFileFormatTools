@@ -93,21 +93,27 @@ def main():
 
                 buckets = [0 for i in range(palette_size)]
 
+                complete_list = []
+
                 for i, value in enumerate(decoded_values):
                     x = i % 16
                     z = (i // 16) % 16
                     y = i // 256
 
                     hilbert_index = hilbert_3d(x, y, z)
+                    complete_list.append(hilbert_index)
                     second_storage.set(hilbert_index, value)
                     buckets[value] += 1
 #                    section["block_states"]["data"]
+
+                print(sorted(complete_list))
+                exit(0)
 
                 section["block_states"]["data"] = nbtlib.tag.LongArray(second_storage.get_raw())
                 largest = 0
                 rest = 0
 #                if section["Y"] == 1:
-                if True:
+                if False:
                     print("Buckets:", len(buckets), int(section["Y"]))
                     sorted_buckets = sorted(enumerate(buckets), key=lambda x: x[1], reverse=True)
                     largest += sorted_buckets[0][1]
