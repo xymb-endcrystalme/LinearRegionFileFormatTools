@@ -4,6 +4,7 @@ import sys
 import os
 import time
 import math
+import nbtlib
 
 # Add the parent directory to the Python path
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
