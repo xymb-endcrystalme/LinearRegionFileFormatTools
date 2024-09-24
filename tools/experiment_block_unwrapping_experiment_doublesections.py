@@ -14,6 +14,32 @@ import mclinear
 from tools.simplebitstorage import SimpleBitStorage
 from tools.secondbitstorage import SecondBitStorage
 
+def hilbert_3d(x, y, z):
+    """
+    Convert (x,y,z) to d, the distance along the Hilbert curve.
+    (x,y,z) is assumed to be in the range 0-15 for a 16x16x16 cube.
+    """
+    x, y, z = x & 15, y & 15, z & 15  # Ensure inputs are in 0-15 range
+    
+    def rot(n, x, y, z, rx, ry, rz):
+        if ry == 0:
+            if rz == 1:
+                x = n-1 - x
+                z = n-1 - z
+            x, z = z, x
+        return x, y, z
+
+    d = 0
+    s = 8
+    while s > 0:
+        rx = (x & s) > 0
+        ry = (y & s) > 0
+        rz = (z & s) > 0
+        d += s * s * s * ((3 * rx) ^ ry ^ rz)
+        x, y, z = rot(s, x, y, z, rx, ry, rz)
+        s //= 2
+    return d
+
 def get_file_size(file_path):
     return os.path.getsize(file_path)
 
@@ -68,12 +94,12 @@ def main():
                 buckets = [0 for i in range(palette_size)]
 
                 for i, value in enumerate(decoded_values):
-#                    second_storage.set(i, value)
                     x = i % 16
                     z = (i // 16) % 16
                     y = i // 256
 
-                    second_storage.set(y * 16 + x + z * 16, value)
+                    hilbert_index = hilbert_3d(x, y, z)
+                    second_storage.set(hilbert_index, value)
                     buckets[value] += 1
 #                    section["block_states"]["data"]
 
