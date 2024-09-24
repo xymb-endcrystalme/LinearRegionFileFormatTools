@@ -43,7 +43,11 @@ class SecondBitStorage:
         return (l >> j) & self.mask
 
     def get_raw(self) -> List[int]:
-        return [val & ((1 << 32) - 1) for val in self.data]
+        ret = list()
+        for num in self.data:
+            if num > 1 << 63:
+                num = - 1 << 63 - num
+        return self.data[ret]
 
     def get_size(self) -> int:
         return self.size
