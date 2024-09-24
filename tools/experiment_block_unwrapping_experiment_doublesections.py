@@ -14,13 +14,16 @@ import mclinear
 from tools.simplebitstorage import SimpleBitStorage
 from tools.secondbitstorage import SecondBitStorage
 
-def hilbert_3d(x, y, z):
+# Global variable to store the precomputed Hilbert curve
+hilbert_lookup = []
+
+def hilbert3d_precompute():
     """
-    Convert (x,y,z) to d, the distance along the Hilbert curve.
-    (x,y,z) is assumed to be in the range 0-15 for a 16x16x16 cube.
+    Precompute the 3D Hilbert curve for a 16x16x16 cube.
     """
-    x, y, z = x & 15, y & 15, z & 15  # Ensure inputs are in 0-15 range
-    
+    global hilbert_lookup
+    hilbert_lookup = [0] * (16 * 16 * 16)
+
     def rot(n, x, y, z, rx, ry, rz):
         if ry == 0:
             if rz == 1:
@@ -29,22 +32,37 @@ def hilbert_3d(x, y, z):
             x, z = z, x
         return x, y, z
 
-    d = 0
-    s = 8
-    while s > 0:
-        rx = (x & s) > 0
-        ry = (y & s) > 0
-        rz = (z & s) > 0
-        d += s * s * s * ((3 * rx) ^ ry ^ rz)
-        x, y, z = rot(s, x, y, z, rx, ry, rz)
-        s //= 2
-    return d
+    def hilbert3d(x, y, z):
+        d = 0
+        s = 8
+        while s > 0:
+            rx = (x & s) > 0
+            ry = (y & s) > 0
+            rz = (z & s) > 0
+            d += s * s * s * ((3 * rx) ^ ry ^ rz)
+            x, y, z = rot(s, x, y, z, rx, ry, rz)
+            s //= 2
+        return d
+
+    for x in range(16):
+        for y in range(16):
+            for z in range(16):
+                index = x + (y << 4) + (z << 8)
+                hilbert_lookup[index] = hilbert3d(x, y, z)
+
+def hilbert3d_index(x, y, z):
+    """
+    Get the precomputed Hilbert curve index for given (x,y,z) coordinates.
+    """
+    return hilbert_lookup[x + (y << 4) + (z << 8)]
 
 def get_file_size(file_path):
     return os.path.getsize(file_path)
 
 def main():
-#    input_file = "/home/bc/.local/share/PrismLauncher/instances/Vanilla/.minecraft/saves/aaaaa/region/r.0.0.mca"
+    # Precompute the Hilbert curve
+    hilbert3d_precompute()
+
     if False:
         INPUT_FILE = "/tmp/r.0.0.mca"
         region = mclinear.open_region_anvil(INPUT_FILE)
@@ -100,14 +118,13 @@ def main():
                     z = (i // 16) % 16
                     y = i // 256
 
-                    hilbert_index = hilbert_3d(x, y, z)
+                    hilbert_index = hilbert3d_index(x, y, z)
                     complete_list.append(hilbert_index)
                     second_storage.set(hilbert_index, value)
                     buckets[value] += 1
-#                    section["block_states"]["data"]
 
                 print(sorted(complete_list))
-                exit(0)
+                # Removed exit(0) to allow processing of all chunks
 
                 section["block_states"]["data"] = nbtlib.tag.LongArray(second_storage.get_raw())
                 largest = 0
