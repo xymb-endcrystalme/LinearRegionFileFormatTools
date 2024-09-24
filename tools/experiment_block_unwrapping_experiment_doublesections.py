@@ -124,7 +124,7 @@ def main():
                     buckets[value] += 1
 
                 print(sorted(complete_list))
-                # Removed exit(0) to allow processing of all chunks
+                exit(0)
 
                 section["block_states"]["data"] = nbtlib.tag.LongArray(second_storage.get_raw())
                 largest = 0
