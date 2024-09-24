@@ -37,7 +37,7 @@ def main():
 
         for section in nbt["sections"]:
 #            if section["Y"] == 1:
-            if "block_states" in section and "data" in section["block_states"]:
+            if "block_states" in section and "data" in section["block_states"] and len(section["block_states"]["palette"]) > 1:
                 palette_size = len(section["block_states"]["palette"])
 #                print("Palette size", palette_size)
 #                print("aaa", section["block_states"]["data"])
@@ -78,11 +78,20 @@ def main():
 #                    section["block_states"]["data"]
 
                 section["block_states"]["data"] = nbtlib.tag.LongArray(second_storage.get_raw())
-                if section["Y"] == 1:
-                    print("Buckets:")
+                largest = 0
+                rest = 0
+#                if section["Y"] == 1:
+                if True:
+                    print("Buckets:", len(buckets), int(section["Y"]))
                     sorted_buckets = sorted(enumerate(buckets), key=lambda x: x[1], reverse=True)
+                    largest += sorted_buckets[0][1]
+                    for i in range(1, len(sorted_buckets)):
+                        rest += sorted_buckets[i][1]
                     for i, bucket in sorted_buckets:
-                        print(bucket, section["block_states"]["palette"][i]["Name"])
+                        print(i, bucket, section["block_states"]["palette"][i]["Name"])
+
+                    print()
+                    print(largest, "/", rest)
 
 #                print()
 #                print("a", int_list)
