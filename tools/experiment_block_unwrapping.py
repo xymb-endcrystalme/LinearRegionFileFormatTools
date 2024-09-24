@@ -23,7 +23,7 @@ def main():
     nbt = region.chunks[0].as_nbtlib()
 
     for section in nbt["sections"]:
-        if section["Y"] == 0:
+        if section["Y"] == 1:
             palette_size = len(section["block_states"]["palette"])
             print("Palette size", palette_size)
             print("aaa", section["block_states"]["data"])
@@ -43,7 +43,12 @@ def main():
             
             print("Decoded values:")
             for i, value in enumerate(decoded_values):
-                print(f"Block {i}: {value}")
+                if value != 0:
+                    y = i // 256
+                    remainder = i % 256
+                    x = remainder // 16
+                    z = remainder % 16
+                    print(f"Block {i} - {x} {y} {z}: {value}")
 
 if __name__ == "__main__":
     main()
