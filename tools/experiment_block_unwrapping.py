@@ -11,6 +11,7 @@ sys.path.insert(0, parent_dir)
 
 import mclinear
 from tools.simplebitstorage import SimpleBitStorage
+from tools.secondbitstorage import SecondBitStorage
 
 def get_file_size(file_path):
     return os.path.getsize(file_path)
@@ -49,6 +50,11 @@ def main():
                     x = remainder // 16
                     z = remainder % 16
                     print(f"Block {i} - {x} {y} {z}: {value}")
+
+            # Transform to SecondBitStorage
+            second_storage = SecondBitStorage(bits_per_block, 4096, int_list)
+            print("\nSecondBitStorage tolist():")
+            print(second_storage.get_raw())
 
 if __name__ == "__main__":
     main()
