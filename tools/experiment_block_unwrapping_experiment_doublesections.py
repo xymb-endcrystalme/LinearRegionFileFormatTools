@@ -22,39 +22,38 @@ def hilbert3d_precompute():
     Precompute the 3D Hilbert curve for a 16x16x16 cube.
     """
     global hilbert_lookup
-    hilbert_lookup = [0] * (16 * 16 * 16)
+    hilbert_lookup = [0] * 4096
 
     def rot(n, x, y, z, rx, ry, rz):
         if ry == 0:
             if rz == 1:
-                x = n-1 - x
-                z = n-1 - z
-            x, z = z, x
+                x, z = n-1 - z, n-1 - x
+            else:
+                x, z = z, x
         return x, y, z
 
     def hilbert3d(x, y, z):
+        n = 16
         d = 0
-        s = 8
-        while s > 0:
-            rx = (x & s) > 0
-            ry = (y & s) > 0
-            rz = (z & s) > 0
-            d += s * s * s * ((3 * rx) ^ ry ^ rz)
-            x, y, z = rot(s, x, y, z, rx, ry, rz)
-            s //= 2
+        for s in range(3, -1, -1):
+            rx = (x >> s) & 1
+            ry = (y >> s) & 1
+            rz = (z >> s) & 1
+            d += (7 * rx ^ 3 * ry ^ rz) << (3 * s)
+            x, y, z = rot(n >> s, x, y, z, rx, ry, rz)
         return d
 
-    for x in range(16):
-        for y in range(16):
-            for z in range(16):
-                index = x + (y << 4) + (z << 8)
-                hilbert_lookup[index] = hilbert3d(x, y, z)
+    for i in range(4096):
+        x = i & 15
+        y = (i >> 4) & 15
+        z = (i >> 8) & 15
+        hilbert_lookup[i] = hilbert3d(x, y, z)
 
 def hilbert3d_index(x, y, z):
     """
     Get the precomputed Hilbert curve index for given (x,y,z) coordinates.
     """
-    return hilbert_lookup[x + (y << 4) + (z << 8)]
+    return hilbert_lookup[x | (y << 4) | (z << 8)]
 
 def get_file_size(file_path):
     return os.path.getsize(file_path)
@@ -113,18 +112,20 @@ def main():
 
                 complete_list = []
 
-                for i, value in enumerate(decoded_values):
-                    x = i % 16
-                    z = (i // 16) % 16
-                    y = i // 256
+                for i in range(4096):
+                    x = i & 15
+                    y = (i >> 4) & 15
+                    z = (i >> 8) & 15
 
                     hilbert_index = hilbert3d_index(x, y, z)
+                    value = decoded_values[i]
                     complete_list.append(hilbert_index)
                     second_storage.set(hilbert_index, value)
                     buckets[value] += 1
 
-                print(sorted(complete_list))
-                exit(0)
+                print(f"Number of unique indices: {len(set(complete_list))}")
+                print(f"Min index: {min(complete_list)}, Max index: {max(complete_list)}")
+                print(f"First 20 sorted indices: {sorted(complete_list)[:20]}")
 
                 section["block_states"]["data"] = nbtlib.tag.LongArray(second_storage.get_raw())
                 largest = 0
