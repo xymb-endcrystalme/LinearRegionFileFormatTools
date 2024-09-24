@@ -76,9 +76,3 @@ class SecondBitStorage:
             for p in range(n):
                 out[j + p] = o & self.mask
                 o >>= self.bits
-
-    def copy(self):
-        return SecondBitStorage(self.bits, self.size, self.data.copy())
-
-    class InitializationException(Exception):
-        pass
