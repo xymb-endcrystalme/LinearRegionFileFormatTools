@@ -49,12 +49,25 @@ def main():
         '''
         TO_MERGE = 2
 
+# File size recompressed: 4643004 - 1 - baseline
+# File size recompressed: 4851799 - 2
+# File size recompressed: 5348585 - 4
+
+# File size recompressed: 4442481 - 8 * 1
+# File size recompressed: 4405727 - 8 * 2
+# File size recompressed: 4443728 - 8 * 4
+
+# That's a fail...
+
         offset = 0
+
+        final_sections = []
 
         for i, section in enumerate(nbt["sections"]):
             if int(section["Y"] <= -5):
                 offset += 1
                 continue
+            if int(section["Y"] >= 4): break
             if "block_states" not in section or "data" not in section["block_states"] or len(section["block_states"]["palette"]) <= 1:
                 print(section["Y"])
                 break
@@ -64,7 +77,7 @@ def main():
 
             if (i - offset) % TO_MERGE != TO_MERGE - 1: continue
 
-            print("Merging", len(previous_sections))
+#            print("Merging", len(previous_sections))
 
 #            final_palette = nbtlib.tag.Compound()
             final_palette = []
@@ -78,11 +91,17 @@ def main():
                     if s not in total_palette:
                         total_palette[s] = element
                         palette_mappings[s] = len(palette_mappings)
-                print("Palette:", len(section["block_states"]["palette"]))
+#                print("Palette:", len(section["block_states"]["palette"]))
 
-            print("Total palette length:", len(total_palette))
+#            print("Total palette length:", len(total_palette))
 
             bits_per_block_final = max(4, math.ceil(math.log2(len(total_palette))))
+            print("Bits per block final:", bits_per_block_final)
+            if bits_per_block_final == 3: bits_per_block_final = 8
+            if bits_per_block_final == 4: bits_per_block_final = 8
+            if bits_per_block_final == 5: bits_per_block_final = 8
+            if bits_per_block_final == 6: bits_per_block_final = 8
+            if bits_per_block_final == 7: bits_per_block_final = 8
             final_storage = SimpleBitStorage(bits_per_block_final, 4096 * TO_MERGE)
 
             for j, section in enumerate(previous_sections):
@@ -90,7 +109,7 @@ def main():
                 for element in section["block_states"]["palette"]:
                     s = str(element)
                     mappings.append(palette_mappings[s])
-                print(mappings)
+#                print(mappings)
 
                 palette_size = len(section["block_states"]["palette"])
                 bits_per_block = max(4, math.ceil(math.log2(palette_size)))
@@ -103,12 +122,21 @@ def main():
                 for v in range(4096):
                     final_storage.set(v + 4096 * j, mappings[decoded_values[v]])
 
-            print(final_storage.get_raw())
+#            print(final_storage.get_raw())
 
             final_palette_mappings = [total_palette[k] for k, _ in sorted(palette_mappings.items(), key=lambda x: x[1])]
-            print("Final palette mappings:", final_palette_mappings)
+            final_palette_mappings = nbtlib.tag.List(final_palette_mappings)
+            print("Final palette mappings:", len(final_palette_mappings))
 
+            final = nbtlib.tag.Compound({"palette": final_palette_mappings, "data": nbtlib.tag.LongArray(final_storage.get_raw()), "Y": section["Y"]})
+            final_sections.append(final)
+#            final_palette_mappings.
+#            final_sections.append
 #            section["block_states"]["data"] = nbtlib.tag.LongArray(final_storage.get_raw())
+
+        nbt["sections"] = nbtlib.tag.List(final_sections)
+        print("Final sections", len(nbt["sections"]))
+#        exit(0)
 
         chunk.from_nbtlib(nbt)
 

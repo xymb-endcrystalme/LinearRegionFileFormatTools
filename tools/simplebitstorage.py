@@ -53,7 +53,7 @@ class SimpleBitStorage:
         return (l >> j) & self.mask
 
     def get_raw(self) -> List[int]:
-        return self.data
+        return [num if num < (1 << 63) else num - (1 << 64) for num in self.data]
 
     def get_size(self) -> int:
         return self.size

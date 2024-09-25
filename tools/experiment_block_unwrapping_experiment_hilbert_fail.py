@@ -130,8 +130,8 @@ def main():
                 section["block_states"]["data"] = nbtlib.tag.LongArray(second_storage.get_raw())
                 largest = 0
                 rest = 0
-#                if section["Y"] == 1:
-                if False:
+                if section["Y"] == 4:
+#                if False:
                     print("Buckets:", len(buckets), int(section["Y"]))
                     sorted_buckets = sorted(enumerate(buckets), key=lambda x: x[1], reverse=True)
                     largest += sorted_buckets[0][1]
