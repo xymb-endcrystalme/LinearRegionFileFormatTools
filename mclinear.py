@@ -465,9 +465,7 @@ def open_region_linear_v2(file_path):
                             timestamps[chunk_index] = timestamp
                             iterator += 12
                             if chunk_size == 0:
-                                if chunk_existence_bitmap[chunk_index] == True: raise Exception("Bitmap is incorrect - false positive")
                                 continue
-                            if chunk_existence_bitmap[chunk_index] == False: raise Exception("Bitmap is incorrect - false negative")
                             chunk_data = decompressed_bucket[iterator:iterator + chunk_size - 8]
                             chunks[chunk_index] = Chunk(chunk_data, REGION_DIMENSION * region_x + chunk_index % 32, REGION_DIMENSION * region_z + chunk_index // 32)
                             iterator += chunk_size - 8
