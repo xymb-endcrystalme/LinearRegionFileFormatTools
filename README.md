@@ -9,8 +9,7 @@ This repository hosts tools to convert between `.mca` and `.linear`.
 - Reads and writes whole files, so it will actually be _faster_ than `.mca` on a spinning HDD (way less IOPS than `.mca`)
 - Replaces symlinks with files, thus allows caching on HDD
 - Uses slightly more memory than Anvil - it has to store the whole region file in memory for individual chunk access
-- Much simpler format - about 300 lines of code vs about 1000 LoC for Anvil
-- Also serves as a memory test
+- Much simpler format - about 600 lines of code vs about 1000 LoC for Anvil
 
 ## How:
 There are three problems with the default Minecraft region file format (Anvil):
@@ -20,14 +19,14 @@ There are three problems with the default Minecraft region file format (Anvil):
 
 Linear compresses a whole region file at once, achieving superior compression ratio.
 
-It also gets rid of `.mcc` files for chunks bigger than 1MB as it's a stupid, unnecessary kludge. The total limit for whole region file is 4GB.
+It also gets rid of `.mcc` files for chunks bigger than 1MB as it's a stupid, unnecessary kludge. The total limit for whole region file is 2GB.
 
 ### Individual compression of chunks:
 The fact that each chunk is stored individually in Anvil means that compression doesn't have the opportunity to "learn" the surrounding data.
 
 Thus, the compression ratio is extremely small.
 
-Linear region file solves that problem by writing the whole 32 x 32 (512) chunk region as a single compression stream.
+Linear region file solves that problem by compressing 4x4 chunks as a single compression stream, thus achieving both performance and compression ratio.
 
 ### zlib vs zstd:
 
@@ -53,23 +52,22 @@ All plugins that use NMS or Bukkit (ex. Chunky) will work.
 
 ## Supported software:
 
-[LinearPurpur](https://github.com/StupidCraft/LinearPurpur) - An up-to-date fork of Purpur that simply implements the newest Linear region file format.
-
-[Kaiiju](https://github.com/KaiijuMC/Kaiiju) - Fork of Folia optimized for Anarchy servers. The stuff that will soon run on `Endcrystal.me` and `6b6t.org`.
-
-[LeavesMC](https://github.com/LeavesMC/Leaves) - An paper fork that fixes broken vanilla properties.
+🥶
 
 ## Python prerequisites:
 
 ```
-apt install python3-pip
+apt install python3-pip virtualenv
+virtualenv env
+source env/bin/activate
 pip3 install -r requirements.txt
 ```
 
 ## Usage:
 
 ```
-./convert_region_files.py mca2linear /home/xymb/minecraft/world/region /tmp/out/world/region
+source env/bin/activate
+tools/convert_region_files.py mca2linear /home/xymb/minecraft/world/region /tmp/out/world/region
 Found 18 region files to convert
 Converting files: 100%|█████████████████████████████████████████████████████████████████████████████████| 18/18 [00:12<00:00,  1.49it/s]
 Conversion complete: 18 region files converted, 0 region files skipped

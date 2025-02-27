@@ -30,6 +30,8 @@ The superblock contains metadata about the file and has the following structure:
 
 ### Chunk Existence Bitmap (128 bytes)
 
+**Please don't rely on this feature, Java implementation is broken and needs fixing before it can be relied on.**
+
 A 1024-bit bitmap that indicates if a chunk exists or not. It is serialized into 128 bytes, where each bit represents the existence of a chunk. This allows for quick checking of chunk existence without decompressing the entire file.
 
 ### NBT Features
