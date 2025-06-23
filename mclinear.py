@@ -42,6 +42,20 @@ class Region:
         non_empty_chunks = sum(1 for chunk in self.chunks if chunk is not None)
         return f"Region ({self.region_x}, {self.region_z}) - {non_empty_chunks}/{len(self.chunks)} chunks - Last modified: {self.mtime}"
 
+    def hash(self):
+        h = xxhash.xxh64()
+        h.update(struct.pack(">ii", self.region_x, self.region_z))
+
+        for chunk in self.chunks:
+            if chunk is None:
+                h.update(b'\x00')
+            else:
+                h.update(b'\x01')
+                h.update(struct.pack(">I", len(chunk.raw_chunk)))
+                h.update(chunk.raw_chunk)
+
+        return h.hexdigest()
+
 REGION_DIMENSION = 32
 COMPRESSION_TYPE = b'\x02'
 COMPRESSION_TYPE_ZLIB = 2

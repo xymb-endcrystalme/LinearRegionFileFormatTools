@@ -79,7 +79,7 @@ class TestExample(unittest.TestCase):
         verify_region(region2)
         self.compare_regions(region2, mclinear.open_region(os.path.join(self.test_dir, "r.0.0.linear")))
 
-
+        self.assertEqual(region2.hash(), "8a1fa72f78bb22b7")
 
         # print(f"SHA256 hash of all raw chunk data: {sha256_hash.hexdigest()}")
         # print(f"SHA256 hash of NBT: {sha256_hash_nbt.hexdigest()}")
