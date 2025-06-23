@@ -472,3 +472,34 @@ def open_region_linear_v2(file_path):
             offset += bucket_size
 
     return Region(chunks, region_x, region_z, mtime, timestamps, nbt_features=nbt_features)
+
+def open_region(file_path):
+    """
+    Open any supported Minecraft region type and return a Region object.
+    The decision is done by looking at the 8-byte signature at the
+    beginning of the file:
+        – LINEAR_SIGNATURE  + version 1/2  ->  open_region_linear
+        – LINEAR_SIGNATURE  + version 3    ->  open_region_linear_v2
+        – anything else                    ->  open_region_anvil
+    """
+    # Read first 9 bytes (enough for signature + 1-byte version)
+    with open(file_path, "rb") as _f:
+        header = _f.read(9)
+
+    # Small / empty file -> try anvil, will raise if invalid
+    if len(header) < 9:
+        return open_region_anvil(file_path)
+
+    signature = struct.unpack(">Q", header[:8])[0]
+
+    if signature == LINEAR_SIGNATURE:
+        version = header[8]
+        if version in (1, 2):
+            return open_region_linear(file_path)
+        elif version == 3:
+            return open_region_linear_v2(file_path)
+        else:
+            raise Exception(f"Unsupported Linear region version {version}")
+    else:
+        # Default to Anvil (.mca) format
+        return open_region_anvil(file_path)
